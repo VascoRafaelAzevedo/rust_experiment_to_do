@@ -1,0 +1,7 @@
+[package]
+name = "first_experiment"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tui-banner = "0.2.3"
