@@ -73,22 +73,32 @@ fn make_banner(title: String, style: tui_banner::Style) -> Result<String, tui_ba
 fn app_loop() {
     let mut tasks: Vec<Task> = vec![];
 
-    println!("Please insert command:");
-    print!(">");
+    loop {
+        clear_terminal();
+        let _ = welcome_banner();
 
-    let mut user_input = String::new();
-    io::stdin()
-        .read_line(&mut user_input)
-        .expect("fail to read input");
+        println!("Please insert command:");
 
-    let input_arguments: Vec<String> = user_input.split_whitespace().map(String::from).collect();
-    match input_arguments[0].as_str() {
-        "add" => add_task(&tasks, &input_arguments[1..]),
-        _ => {
-            println!(
-                "Error, no command {} found, type help for the command list.",
-                input_arguments[0]
-            )
+        let mut user_input = String::new();
+        io::stdin()
+            .read_line(&mut user_input)
+            .expect("fail to read input");
+
+        let input_arguments: Vec<String> =
+            user_input.split_whitespace().map(String::from).collect();
+        match input_arguments[0].as_str() {
+            "add" => add_task(&mut tasks, &input_arguments[1..]),
+            "list" => list_tasks(&tasks),
+            _ => {
+                println!("");
+                println!(
+                    "Error, no command {} found, type help for the command list.",
+                    input_arguments[0]
+                );
+                println!("Press enter to continue!");
+                let mut _input = String::new();
+                io::stdin().read_line(&mut _input).expect("Fail");
+            }
         }
     }
 }
@@ -98,8 +108,14 @@ fn clear_terminal() {
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
 }
 
-fn list_tasks(tasks_list: &Task) {
-    todo!()
+fn list_tasks(tasks_list: &Vec<Task>) {
+    for task_to_list in tasks_list {
+        println!("{} - {}", task_to_list.id, task_to_list.title);
+        println!("");
+    }
+    println!("Please press enter to continue!");
+    let mut _input = String::new();
+    io::stdin().read_line(&mut _input).expect("Fail");
 }
 
 fn remove_task(tasks_list: &Task) {
@@ -107,16 +123,14 @@ fn remove_task(tasks_list: &Task) {
 }
 
 fn add_task(tasks_list: &mut Vec<Task>, new_input: &[String]) {
-    let new_Task = Task {
+    let new_task = Task {
         id: tasks_list.len() as i32,
         title: new_input.join(" "),
         ..Default::default()
     };
-    tasks_list.push(new_Task);
+    tasks_list.push(new_task);
 }
 
 fn main() {
-    let _ = welcome_banner();
-
     app_loop();
 }
