@@ -71,95 +71,48 @@ fn make_banner(title: String, style: tui_banner::Style) -> Result<String, tui_ba
 }
 
 fn app_loop() {
-    let mut tasks_list: Vec<Task> = vec![];
+    let mut tasks: Vec<Task> = vec![];
+
+    println!("Please insert command:");
+    print!(">");
 
     let mut user_input = String::new();
-
     io::stdin()
         .read_line(&mut user_input)
-        .expect("Failed to read input!");
-    user_input = user_input.trim().to_owned();
+        .expect("fail to read input");
 
-    match user_input.as_str() {
-        "add" => add_task(&mut tasks_list),
-        "rem" => remove_task(&mut tasks_list),
-        "list" => list_tasks(&tasks_list),
-        "edit" => edit_task(&mut tasks_list),
-        _ => println!("Command Not Found!"),
+    let input_arguments: Vec<String> = user_input.split_whitespace().map(String::from).collect();
+    match input_arguments[0].as_str() {
+        "add" => add_task(&tasks, &input_arguments[1..]),
+        _ => {
+            println!(
+                "Error, no command {} found, type help for the command list.",
+                input_arguments[0]
+            )
+        }
     }
 }
 
-fn edit_task(tasks_list: &[Task]) {
-    let edit_id = chose_task(tasks_list);
-
-    clear_terminal();
-    // show banner
-    let banner = make_banner("Edit Task".to_owned(), Style::NeonCyber);
-
-    match banner {
-        Ok(banner) => println!("{}", banner),
-        Err(e) => println!("Error in Banner {}", e),
-    }
-    //end show banner
-    println!("{}", tasks_list[edit_id].title);
-    println!("-----------------------------");
-    println!("Description: {}", tasks_list[edit_id].description);
-    println!("Priority: {}", tasks_list[edit_id].priority);
-    println!("-----------------------------");
-    println!("Insert what to do: (h for help)");
-
-    loop {
-
-        let mut user_input = String::new();
-        io::stdin()
-            .read_line(&mut user_input)
-            .expect("Failed to read input!");
-        match user_input.trim() {
-            "priority" => change_priority(),
-            "description" => change_description(),
-            "back" => return,
-            "h" => edit_help()
-    }
-}
-
+fn edit_task(tasks_list: &Task) {}
 fn clear_terminal() {
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
 }
 
-fn chose_task(tasks_list: &[Task]) -> usize {
-    clear_terminal();
-    // show banner
-    let banner = make_banner("Chose Task".to_owned(), Style::NeonCyber);
-
-    match banner {
-        Ok(banner) => println!("{}", banner),
-        Err(e) => println!("Error in Banner {}", e),
-    }
-    //end show banner
-
-    for task in tasks_list {
-        println!("{} - {}", task.id, task.title);
-    }
-
-    loop {
-        let mut user_input = String::new();
-        io::stdin()
-            .read_line(&mut user_input)
-            .expect("Failed to read input!");
-        match user_input.trim().parse::<i32>() {
-            Ok(id) => return id as usize,
-            Err(_) => println!("Invalid Number!"),
-        }
-    }
-}
-fn list_tasks(tasks_list: &[Task]) {}
-
-fn remove_task(tasks_list: &[Task]) {
+fn list_tasks(tasks_list: &Task) {
     todo!()
 }
 
-fn add_task(tasks_list: &[Task]) {
+fn remove_task(tasks_list: &Task) {
     todo!()
+}
+
+fn add_task(tasks_list: &mut Vec<Task>, new_input: &[String]) {
+    let new_Task = Task {
+        id: tasks_list.len() as i32,
+        title: new_input.join(" "),
+        ..Default::default()
+    };
+    tasks_list.push(new_Task);
 }
 
 fn main() {
